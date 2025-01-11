@@ -2,23 +2,26 @@
 
 namespace App\Models;
 
-namespace App\Models;
-
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Notifications\Notifiable;
+use App\Notifications\ResetPassword;
 
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
+    use CanResetPassword;
 
-    // Define the fields that are safe for mass assignment
     protected $fillable = ['name', 'email', 'password'];
 
-    // Define hidden attributes, like password and remember_token
     protected $hidden = ['password', 'remember_token'];
 
-    // Define JWT-related methods
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPassword($token));
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
