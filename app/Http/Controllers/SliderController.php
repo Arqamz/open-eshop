@@ -11,23 +11,25 @@ class SliderController extends Controller
     /**
      * Upload or replace an image in a specific position.
      */
-    public function uploadOrReplace(Request $request, $id)
+    public function uploadOrReplace(Request $request, $position)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'required|file|mimes:jpeg,png,svg|max:2048', // Max 2MB
         ]);
 
-        if ($id < 1 || $id > 10) {
+        if ($position < 1 || $position > 10) {
             return response()->json([
-                'message' => 'Invalid position. ID must be between 1 and 10.',
+                'message' => 'Invalid position. Position must be between 1 and 10.',
             ], 400);
         }
 
+        // Store the image file
         $filePath = $request->file('image')->store('sliders', 'public');
 
+        // Create or update slider at the specific position
         $slider = Slider::updateOrCreate(
-            ['id' => $id], // Match by ID (position)
+            ['position' => $position], // Match by position
             ['name' => $request->name, 'path' => $filePath]
         );
 
@@ -38,21 +40,30 @@ class SliderController extends Controller
     }
 
     /**
-     * Get all slider images sorted by ID.
+     * Get all slider images sorted by position.
      */
     public function getAll()
     {
-        $sliders = Slider::orderBy('id')->get();
+        $sliders = Slider::orderBy('position')->get();
 
-        return response()->json($sliders);
+        return response()->json([
+            'message' => 'Slider images fetched successfully.',
+            'sliders' => $sliders,
+        ]);
     }
 
     /**
      * Delete an image from a specific position.
      */
-    public function deleteById($id)
+    public function deleteById($position)
     {
-        $slider = Slider::findOrFail($id);
+        $slider = Slider::where('position', $position)->first();
+
+        if (!$slider) {
+            return response()->json([
+                'message' => 'Slider image not found.',
+            ], 404);
+        }
 
         // Delete the image file
         Storage::disk('public')->delete($slider->path);
@@ -65,4 +76,3 @@ class SliderController extends Controller
         ]);
     }
 }
-

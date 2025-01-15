@@ -12,12 +12,14 @@ return new class extends Migration
     public function up()
     {
         Schema::create('sliders', function (Blueprint $table) {
-            $table->integer('id')->primary(); // Manual IDs for positions 1-10
+            $table->id(); // Auto-increment primary key
             $table->string('name');
             $table->string('path');
+            $table->integer('position')->unique(); // Unique position for each slider
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

@@ -9,7 +9,7 @@ class Slider extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'path'];
-    protected $keyType = 'integer'; // Prevent non-integer ID
-    public $incrementing = false; // Prevent auto-increment
+    protected $fillable = ['name', 'path', 'position'];
+
+    public $timestamps = true;
 }
