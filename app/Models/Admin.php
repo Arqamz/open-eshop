@@ -29,6 +29,9 @@ class Admin extends Authenticatable implements JWTSubject
 
     public function getJWTCustomClaims()
     {
-        return ['role' => 'admin'];
+        return [
+            'role' => 'admin',
+            'guard' => 'admin',
+        ];
     }
 }

@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Log;
+
 
 class AdminController extends Controller
 {
@@ -49,13 +52,16 @@ class AdminController extends Controller
         return response()->json(['token' => $token]);
     }
 
-    /**
-     * Get the authenticated admin
-     */
     public function me()
     {
-        $admin = auth('admin')->user();
-        return response()->json($admin);
+        try {
+            $admin = JWTAuth::parseToken()->authenticate();
+            Log::info("Parsing admin", ['admin' => $admin]);
+            return response()->json($admin);
+        } catch (JWTException $e) {
+            Log::error($e->getMessage());
+            return response()->json(['error' => 'Token is invalid or expired'], 401);
+        }
     }
 
     /**
