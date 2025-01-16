@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Log;
 
 
-class AdminController extends Controller
+class AdminAuthController extends Controller
 {
     /**
      * Register a new admin
