@@ -43,6 +43,19 @@ class CategoryController extends Controller
     }
 
     /**
+     * Enable a category.
+     */
+    public function enable($id)
+    {
+        $category = Category::findOrFail($id);
+        $category->update(['active' => true]);
+
+        return response()->json([
+            'message' => 'Category enabled successfully.',
+        ]);
+    }
+
+    /**
      * Delete a category and its subcategories.
      */
     public function delete($id)
