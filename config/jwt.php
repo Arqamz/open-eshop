@@ -296,11 +296,6 @@ return [
 
         'storage' => Tymon\JWTAuth\Providers\Storage\Illuminate::class,
 
-        'admin' => [
-            'model' => App\Models\Admin::class, // Admin model
-            'guard' => 'admin',
-        ],
-
     ],
 
 ];

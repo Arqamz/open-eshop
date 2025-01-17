@@ -1,34 +1,39 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CustomerAuthController;
+use App\Http\Controllers\AdminAuthController;
+use App\Http\Middleware\AdminJWTMiddleware;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SliderController;
-use App\Http\Controllers\AdminController;
-use App\Http\Middleware\AdminJWTMiddleware;
+use App\Http\Middleware\CustomerJWTMiddleware;
 
-Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
+// Customer auth routes
+Route::prefix('customer')->group(function () {
+    Route::post('register', [CustomerAuthController::class, 'register']);
+    Route::post('login', [CustomerAuthController::class, 'login']);
 
-Route::middleware('auth:api')->get('me', [AuthController::class, 'me']);
-Route::middleware('auth:api')->post('logout', [AuthController::class, 'logout']);
+    Route::post('password/forgot', [CustomerAuthController::class, 'forgotPassword']);
+    Route::post('password/reset', [CustomerAuthController::class, 'resetPassword'])->name('password.reset');
+    Route::get('password/reset/{token}', [CustomerAuthController::class, 'showResetForm'])->name('password.reset');
 
-// Password reset routes
-Route::post('password/forgot', [AuthController::class, 'forgotPassword']);
-Route::post('password/reset', [AuthController::class, 'resetPassword'])->name('password.reset');
+    Route::middleware(CustomerJWTMiddleware::class)->group(function () {
+        Route::get('me', [CustomerAuthController::class, 'me']);
+        Route::post('logout', [CustomerAuthController::class, 'logout']);
+    });
+});
 
-// Route to handle password reset. This route is only for confirming that the token is valid.
-Route::get('password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
-
-// Admin routes
+// Admin auth routes
 Route::prefix('admin')->group(function () {
-    Route::post('register', [AdminController::class, 'register']);
-    Route::post('login', [AdminController::class, 'login']);
-    Route::post('forgot-password', [AdminController::class, 'forgotPassword']);
-    Route::post('reset-password', [AdminController::class, 'resetPassword']);
+    Route::post('register', [AdminAuthController::class, 'register']);
+    Route::post('login', [AdminAuthController::class, 'login']);
+    
+    Route::post('forgot-password', [AdminAuthController::class, 'forgotPassword']);
+    Route::post('reset-password', [AdminAuthController::class, 'resetPassword']);
+
     Route::middleware(AdminJWTMiddleware::class)->group(function () {
-        Route::get('me', [AdminController::class, 'me']);
-        Route::post('logout', [AdminController::class, 'logout']);
+        Route::get('me', [AdminAuthController::class, 'me']);
+        Route::post('logout', [AdminAuthController::class, 'logout']);
     });
 });
 
