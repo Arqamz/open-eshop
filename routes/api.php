@@ -4,9 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerAuthController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Middleware\AdminJWTMiddleware;
+use App\Http\Middleware\CustomerJWTMiddleware;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SliderController;
-use App\Http\Middleware\CustomerJWTMiddleware;
+use App\Http\Controllers\ProductController;
 
 // Customer auth routes
 Route::prefix('customer')->group(function () {
@@ -54,4 +55,18 @@ Route::prefix('sliders')->group(function () {
     Route::get('/', [SliderController::class, 'getAll']);              // Fetch all slider images
     Route::post('{id}', [SliderController::class, 'uploadOrReplace']); // Upload or replace a slider image by ID
     Route::delete('{id}', [SliderController::class, 'deleteById']);   // Delete a slider by ID
+});
+
+// Product routes
+Route::prefix('products')->group(function () {
+    Route::get('/', [ProductController::class, 'index']);
+    Route::get('/{id}', [ProductController::class, 'show']);
+    Route::post('/create', [ProductController::class, 'store']);
+    Route::put('/{id}', [ProductController::class, 'update']);
+    Route::delete('/{id}', [ProductController::class, 'destroy']);
+
+    // Variation routes
+    Route::post('/{productId}/variations', [ProductController::class, 'storeVariation']);
+    Route::put('/{productId}/variations/{variationId}', [ProductController::class, 'updateVariation']);
+    Route::delete('/{productId}/variations/{variationId}', [ProductController::class, 'destroyVariation']);
 });

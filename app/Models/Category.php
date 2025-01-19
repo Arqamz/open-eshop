@@ -26,4 +26,20 @@ class Category extends Model
     {
         return $this->belongsTo(Category::class, 'parent_id');
     }
+
+    /**
+     * Get the products for the category and its subcategories.
+     */
+    public function products()
+    {
+        $products = $this->hasMany(Product::class);
+
+        if ($this->subcategories()->exists()) {
+            foreach ($this->subcategories as $subcategory) {
+            $products = $products->merge($subcategory->products);
+            }
+        }
+
+        return $products;
+    }
 }
