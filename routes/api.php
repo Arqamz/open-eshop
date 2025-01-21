@@ -8,6 +8,8 @@ use App\Http\Middleware\CustomerJWTMiddleware;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ColorController;
+
 
 // Customer auth routes
 Route::prefix('customer')->group(function () {
@@ -55,6 +57,14 @@ Route::prefix('sliders')->group(function () {
     Route::get('/', [SliderController::class, 'getAll']);
     Route::post('{position}', [SliderController::class, 'uploadOrReplace']);
     Route::delete('{position}', [SliderController::class, 'deleteByPosition']);
+});
+
+Route::prefix('color')->group(function () {
+    Route::get('/', [ColorController::class, 'index']);
+    Route::post('/', [ColorController::class, 'store']);
+    Route::get('{id}', [ColorController::class, 'show']);
+    Route::put('{id}', [ColorController::class, 'update']);
+    Route::delete('{id}', [ColorController::class, 'destroy']);
 });
 
 // Product routes

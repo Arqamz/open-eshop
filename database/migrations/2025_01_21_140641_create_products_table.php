@@ -25,8 +25,8 @@ return new class extends Migration
             $table->integer('stock')->default(0);
             $table->decimal('price', 10, 2);
             $table->decimal('weight', 10, 2);
-            $table->foreignId('category_id')->constrained()->nullOnDelete();
-            $table->foreignId('color_id')->constrained()->nullOnDelete();
+            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('color_id')->constrained()->cascadeOnDelete();
             $table->string('size')->nullable();
             $table->string('slug')->unique();
             $table->string('seo_keywords')->nullable();
