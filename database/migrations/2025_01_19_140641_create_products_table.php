@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->text('long_description')->nullable();
-            $table->string('image1')->nullable();
+            $table->string('image1');
             $table->string('image2')->nullable();
             $table->string('image3')->nullable();
             $table->string('image4')->nullable();
@@ -24,12 +24,16 @@ return new class extends Migration
             $table->boolean('status')->default(true);
             $table->integer('stock')->default(0);
             $table->decimal('price', 10, 2);
-            $table->decimal('weight', 10, 2)->nullable();
-            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+            $table->decimal('weight', 10, 2);
+            $table->foreignId('category_id')->constrained()->nullOnDelete();
+            $table->foreignId('color_id')->constrained()->nullOnDelete();
+            $table->string('size')->nullable();
+            $table->string('slug')->unique();
+            $table->string('seo_keywords')->nullable();
+            $table->unsignedBigInteger('product_group_id')->nullable();
             $table->timestamps();
         });
     }
-
 
     /**
      * Reverse the migrations.

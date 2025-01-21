@@ -23,6 +23,11 @@ class Product extends Model
         'price',
         'weight',
         'category_id',
+        'color_id',
+        'size',
+        'slug',
+        'seo_keywords',
+        'product_group_id',
     ];
 
     /**
@@ -34,10 +39,18 @@ class Product extends Model
     }
 
     /**
-     * Get the variations for the product.
+     * Get the color associated with the product.
+     */
+    public function color()
+    {
+        return $this->belongsTo(Color::class);
+    }
+
+    /**
+     * Get all variations belonging to the same group.
      */
     public function variations()
     {
-        return $this->hasMany(ProductVariation::class);
+        return $this->where('product_group_id', $this->product_group_id)->get();
     }
 }

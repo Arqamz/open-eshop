@@ -40,33 +40,34 @@ Route::prefix('admin')->group(function () {
 
 // Category routes
 Route::prefix('categories')->group(function () {
-    Route::get('/', [CategoryController::class, 'getAll']);                 // Get all categories
-    Route::post('/', [CategoryController::class, 'create']);                // Create category
-    Route::patch('{id}/disable', [CategoryController::class, 'disable']);  // Disable category
-    Route::patch('{id}/enable', [CategoryController::class, 'enable']);    // Enable category
-    Route::delete('{id}', [CategoryController::class, 'delete']);          // Delete category
-    Route::put('{id}', [CategoryController::class, 'edit']);               // Edit category
-    Route::get('{id}', [CategoryController::class, 'getById']);            // Get category by ID
-    Route::get('{id}/subcategories', [CategoryController::class, 'getSubcategories']); // Get all subcategories of a parent
+    Route::get('/', [CategoryController::class, 'getAll']);
+    Route::post('/', [CategoryController::class, 'create']);
+    Route::patch('{id}/disable', [CategoryController::class, 'disable']);
+    Route::patch('{id}/enable', [CategoryController::class, 'enable']);
+    Route::delete('{id}', [CategoryController::class, 'delete']);
+    Route::put('{id}', [CategoryController::class, 'edit']);
+    Route::get('{id}', [CategoryController::class, 'getById']);
+    Route::get('{id}/subcategories', [CategoryController::class, 'getSubcategories']);
 });
 
 // Slider routes
 Route::prefix('sliders')->group(function () {
-    Route::get('/', [SliderController::class, 'getAll']);              // Fetch all slider images
-    Route::post('{id}', [SliderController::class, 'uploadOrReplace']); // Upload or replace a slider image by ID
-    Route::delete('{id}', [SliderController::class, 'deleteById']);   // Delete a slider by ID
+    Route::get('/', [SliderController::class, 'getAll']);
+    Route::post('{position}', [SliderController::class, 'uploadOrReplace']);
+    Route::delete('{position}', [SliderController::class, 'deleteByPosition']);
 });
 
 // Product routes
 Route::prefix('products')->group(function () {
     Route::get('/', [ProductController::class, 'index']);
-    Route::get('/{id}', [ProductController::class, 'show']);
-    Route::post('/create', [ProductController::class, 'store']);
-    Route::put('/{id}', [ProductController::class, 'update']);
-    Route::delete('/{id}', [ProductController::class, 'destroy']);
-
-    // Variation routes
-    Route::post('/{productId}/variations', [ProductController::class, 'storeVariation']);
-    Route::put('/{productId}/variations/{variationId}', [ProductController::class, 'updateVariation']);
-    Route::delete('/{productId}/variations/{variationId}', [ProductController::class, 'destroyVariation']);
+    Route::get('{id}', [ProductController::class, 'show']);
+    Route::get('slug/{slug}', [ProductController::class, 'getBySlug']);
+    Route::get('group/{groupId}', [ProductController::class, 'getByGroupId']);
+    Route::post('/', [ProductController::class, 'store']);
+    Route::put('{id}', [ProductController::class, 'update']);
+    Route::delete('{id}', [ProductController::class, 'destroy']);
+    Route::put('{id}/price', [ProductController::class, 'updatePrice']);
+    Route::put('{id}/stock', [ProductController::class, 'updateStock']);
+    Route::put('{id}/group', [ProductController::class, 'assignGroup']);
+    Route::put('{id}/status', [ProductController::class, 'setStatus']);
 });

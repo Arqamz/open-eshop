@@ -55,7 +55,7 @@ class SliderController extends Controller
     /**
      * Delete an image from a specific position.
      */
-    public function deleteById($position)
+    public function deleteByPosition($position)
     {
         $slider = Slider::where('position', $position)->first();
 
