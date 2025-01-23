@@ -36,7 +36,6 @@ Route::prefix('admin')->group(function () {
 
     Route::middleware(AdminJWTMiddleware::class)->group(function () {
         Route::get('me', [AdminAuthController::class, 'me']);
-        Route::post('logout', [AdminAuthController::class, 'logout']);
     });
 });
 
