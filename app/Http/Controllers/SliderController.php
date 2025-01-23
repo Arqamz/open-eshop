@@ -46,10 +46,7 @@ class SliderController extends Controller
     {
         $sliders = Slider::orderBy('position')->get();
 
-        return response()->json([
-            'message' => 'Slider images fetched successfully.',
-            'sliders' => $sliders,
-        ]);
+        return response()->json([$sliders]);
     }
 
     /**

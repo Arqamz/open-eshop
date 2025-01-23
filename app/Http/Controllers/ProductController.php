@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller
 {
@@ -52,25 +53,37 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'long_description' => 'nullable|string',
-            'image1' => 'nullable|file|mimes:jpeg,png,jpg',
-            'image2' => 'nullable|file|mimes:jpeg,png,jpg',
-            'image3' => 'nullable|file|mimes:jpeg,png,jpg',
-            'image4' => 'nullable|file|mimes:jpeg,png,jpg',
-            'image5' => 'nullable|file|mimes:jpeg,png,jpg',
-            'status' => 'boolean',
-            'stock' => 'required|integer',
-            'price' => 'required|numeric',
-            'weight' => 'nullable|numeric',
-            'category_id' => 'nullable|exists:categories,id',
-            'color_id' => 'nullable|exists:colors,id',
-            'size' => 'nullable|string',
-            'seo_keywords' => 'nullable|string',
-            'product_group_id' => 'nullable|integer',
+
+        $request->merge([
+            'status' => filter_var($request->input('status'), FILTER_VALIDATE_BOOLEAN),
         ]);
+
+        Log::info('Request data:', $request->all());
+
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string',
+                'description' => 'required|string',
+                'long_description' => 'nullable|string',
+                'image1' => 'nullable|file|mimes:jpeg,png,jpg',
+                'image2' => 'nullable|file|mimes:jpeg,png,jpg',
+                'image3' => 'nullable|file|mimes:jpeg,png,jpg',
+                'image4' => 'nullable|file|mimes:jpeg,png,jpg',
+                'image5' => 'nullable|file|mimes:jpeg,png,jpg',
+                'status' => 'required|boolean',
+                'stock' => 'required|integer',
+                'price' => 'required|numeric',
+                'weight' => 'nullable|numeric',
+                'category_id' => 'nullable|exists:categories,id',
+                'color_id' => 'nullable|exists:colors,id',
+                'size' => 'nullable|string',
+                'seo_keywords' => 'nullable|string',
+                'product_group_id' => 'nullable|integer',
+            ]);
+        } catch (ValidationException $e) {
+            Log::error('Validation failed:', $e->errors());
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
         // Generate a unique slug
         $slug = Str::slug($validated['name']);
@@ -93,6 +106,8 @@ class ProductController extends Controller
                 $validated[$imageField] = $filePath;
             }
         }
+
+        Log::info('Validated product data:', $validated);
 
         $product = Product::create($validated);
         return response()->json($product, 201);
