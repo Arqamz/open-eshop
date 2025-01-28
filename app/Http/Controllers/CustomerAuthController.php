@@ -7,96 +7,132 @@ use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Exception;
 
-class CustomerAuthController extends Controller
+class CustomerAuthController extends BaseController
 {
     public function register(Request $request)
     {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:customers',
-            'password' => 'required|string|min:8',
-        ]);
+        try {
 
-        $user = Customer::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+            $request->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:customers',
+                'password' => 'required|string|min:8',
+            ]);
+    
+            $user = Customer::create([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+    
+            return $this->sendSuccess("Customer created successfully", $user, 201);
 
-        return response()->json(['message' => 'Customer created successfully']);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
+
     }
 
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
+        try {
 
-        if (!$token = JWTAuth::attempt($request->only('email', 'password'))) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|string',
+            ]);
+
+            if (!$token = JWTAuth::attempt($request->only('email', 'password'))) {
+                return $this->sendError("Unauthorized", null, 401);
+            }
+
+            return $this->sendSuccess("Logged in successfully", $token, 200);
+
+        } catch (Exception $e) {
+            return $this->handleException($e);
         }
-
-        return response()->json(['token' => $token]);
     }
 
     public function me()
     {
-        $user = JWTAuth::parseToken()->authenticate();
-        return response()->json($user);
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+            return $this->sendSuccess("User fetched successfully", $user);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     public function logout()
     {
-        JWTAuth::invalidate(JWTAuth::getToken());
-        return response()->json(['message' => 'Successfully logged out']);
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken());
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
+        return $this->sendSuccess("Logged out successfully");
     }
 
     public function forgotPassword(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        try {
+            $request->validate(['email' => 'required|email']);
 
-        $status = Password::sendResetLink($request->only('email'));
+            $status = Password::sendResetLink($request->only('email'));
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json(['message' => 'Password reset link sent successfully.']);
+            if ($status === Password::RESET_LINK_SENT) {
+                return $this->sendSuccess('Password reset link sent successfully');
+            }
+
+            return $this->sendError('Unable to send password reset link', null, 400);
+
+        } catch (Exception $e) {
+            return $this->handleException($e);
         }
-
-        return response()->json(['error' => 'Unable to send password reset link.'], 400);
     }
 
     public function resetPassword(Request $request)
     {
-        $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        try {
+            $request->validate([
+                'token' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user) use ($request) {
-                $user->password = Hash::make($request->password);
-                $user->save();
+            $status = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function ($user) use ($request) {
+                    $user->password = Hash::make($request->password);
+                    $user->save();
+                }
+            );
+
+            if ($status === Password::PASSWORD_RESET) {
+                return $this->sendSuccess('Password has been successfully reset');
             }
-        );
 
-        if ($status === Password::PASSWORD_RESET) {
-            return response()->json(['message' => 'Password has been successfully reset.']);
+            return $this->sendError('Unable to reset password', null, 400);
+
+        } catch (Exception $e) {
+            return $this->handleException($e);
         }
-
-        return response()->json(['error' => 'Unable to reset password.'], 400);
     }
 
     public function showResetForm($token)
     {
-        return response()->json([
-            'message' => 'Please provide your new password.',
-            'token' => $token,
-        ]);
+        try {
+            return $this->sendSuccess('Reset password form', [
+                'message' => 'Please provide your new password.',
+                'token' => $token
+            ], 200);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
 }

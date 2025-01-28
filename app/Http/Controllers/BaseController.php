@@ -7,6 +7,8 @@ use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\MassAssignmentException;
 
 use Illuminate\Support\Facades\Log;
 
@@ -56,12 +58,20 @@ class BaseController extends Controller
     {
         Log::error($e->getMessage(), ['exception' => $e]);
 
+        if ($e instanceof ModelNotFoundException) {
+            return $this->sendError('Resource not found', null, 404);
+        }
+
         if ($e instanceof JWTException) {
             return $this->sendError('Unauthorized', null, 401);
         }
 
         if ($e instanceof ValidationException) {
             return $this->sendError('Validation failed', $e->errors(), 422);
+        }
+
+        if ($e instanceof MassAssignmentException) {
+            return $this->sendError('Mass assignment error', null, 422);
         }
 
         if ($e instanceof QueryException) {

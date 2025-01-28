@@ -4,16 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Color;
 use Illuminate\Http\Request;
+use Exception;
 
-class ColorController extends Controller
+class ColorController extends BaseController
 {
     /**
      * Get all colors.
      */
     public function index()
     {
-        $colors = Color::all();
-        return response()->json($colors);
+        try{
+            $colors = Color::all();
+            return $this->sendSuccess("Colors fetched successfully", $colors);
+
+        } catch (Exception $e) {
+            $this->handleException($e);
+        }
     }
 
     /**
@@ -21,15 +27,20 @@ class ColorController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|unique:colors',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|unique:colors',
+            ]);
 
-        $color = Color::create([
-            'name' => $request->name,
-        ]);
+            $color = Color::create([
+                'name' => $request->name,
+            ]);
 
-        return response()->json($color, 201);
+            return $this->sendSuccess('Color created successfully', $color, 201);
+
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     /**
@@ -37,8 +48,13 @@ class ColorController extends Controller
      */
     public function show($id)
     {
-        $color = Color::findOrFail($id);
-        return response()->json($color);
+        try {
+            $color = Color::findOrFail($id);
+            return $this->sendSuccess('Color fetched successfully', $color);
+
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     /**
@@ -46,17 +62,22 @@ class ColorController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $color = Color::findOrFail($id);
+        try {
+            $color = Color::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'required|string|unique:colors,name,' . $id,
-        ]);
+            $request->validate([
+                'name' => 'required|string|unique:colors,name,' . $id,
+            ]);
 
-        $color->update([
-            'name' => $validated['name'],
-        ]);
+            $color->update([
+                'name' => $request->name,
+            ]);
 
-        return response()->json($color);
+            return $this->sendSuccess('Color updated successfully', $color);
+
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     /**
@@ -64,9 +85,14 @@ class ColorController extends Controller
      */
     public function destroy($id)
     {
-        $color = Color::findOrFail($id);
-        $color->delete();
+        try {
+            $color = Color::findOrFail($id);
+            $color->delete();
 
-        return response()->json(['message' => 'Color deleted successfully.']);
+            return $this->sendSuccess('Color deleted successfully', null, 204);
+
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 }

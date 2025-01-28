@@ -4,29 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Exception;
 
-class CategoryController extends Controller
+class CategoryController extends BaseController
 {
     /**
      * Create a new category.
      */
     public function create(Request $request)
     {
-        Log::info('Create category called', ['data' => $request->all()]);
+        try {
+            
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'parent_id' => 'nullable|exists:categories,id',
+                'active' => 'required|boolean',
+            ]);
+    
+            $category = Category::create($request->only('name', 'parent_id', 'active'));
+    
+            return $this->sendSuccess('Category created successfully', $category, 201);
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'parent_id' => 'nullable|exists:categories,id',
-            'active' => 'required|boolean',
-        ]);
-
-        $category = Category::create($request->only('name', 'parent_id', 'active'));
-
-        return response()->json([
-            'message' => 'Category created successfully.',
-            'category' => $category,
-        ], 201);
+        }  catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     /**
@@ -34,12 +35,14 @@ class CategoryController extends Controller
      */
     public function disable($id)
     {
-        $category = Category::findOrFail($id);
-        $category->update(['active' => false]);
-
-        return response()->json([
-            'message' => 'Category disabled successfully.',
-        ]);
+        try {
+            $category = Category::findOrFail($id);
+            $category->update(['active' => false]);
+    
+            return $this->sendSuccess('Category disabled successfully');
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     /**
@@ -47,12 +50,15 @@ class CategoryController extends Controller
      */
     public function enable($id)
     {
-        $category = Category::findOrFail($id);
-        $category->update(['active' => true]);
+        try {
+            $category = Category::findOrFail($id);
+            $category->update(['active' => true]);
+    
+            return $this->sendSuccess('Category enabled successfully');
+        } catch (Exception $e) {
+            return $this->handleException($e);
 
-        return response()->json([
-            'message' => 'Category enabled successfully.',
-        ]);
+        }
     }
 
     /**
@@ -60,12 +66,14 @@ class CategoryController extends Controller
      */
     public function delete($id)
     {
-        $category = Category::findOrFail($id);
-        $category->delete();
-
-        return response()->json([
-            'message' => 'Category deleted successfully.',
-        ]);
+        try {
+            $category = Category::findOrFail($id);
+            $category->delete();
+    
+            return $this->sendSuccess('Category deleted successfully', null, 204);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     /**
@@ -73,19 +81,20 @@ class CategoryController extends Controller
      */
     public function edit(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'nullable|string|max:255',
-            'parent_id' => 'nullable|exists:categories,id',
-            'active' => 'nullable|boolean',
-        ]);
-
-        $category = Category::findOrFail($id);
-        $category->update($request->only('name', 'parent_id', 'active'));
-
-        return response()->json([
-            'message' => 'Category updated successfully.',
-            'category' => $category,
-        ]);
+        try {
+            $request->validate([
+                'name' => 'nullable|string|max:255',
+                'parent_id' => 'nullable|exists:categories,id',
+                'active' => 'nullable|boolean',
+            ]);
+    
+            $category = Category::findOrFail($id);
+            $category->update($request->only('name', 'parent_id', 'active'));
+    
+            return $this->sendSuccess('Category updated successfully', $category);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     /**
@@ -93,9 +102,13 @@ class CategoryController extends Controller
      */
     public function getById($id)
     {
-        $category = Category::with('subcategories')->findOrFail($id);
-
-        return response()->json($category);
+        try {
+            $category = Category::with('subcategories')->findOrFail($id);
+    
+            return $this->sendSuccess('Category fetched successfully', $category);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     /**
@@ -103,10 +116,14 @@ class CategoryController extends Controller
      */
     public function getSubcategories($id)
     {
-        $category = Category::findOrFail($id);
-        $subcategories = $category->subcategories;
-
-        return response()->json($subcategories);
+        try {
+            $category = Category::findOrFail($id);
+            $subcategories = $category->subcategories;
+    
+            return $this->sendSuccess('Subcategories fetched successfully', $subcategories);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     /**
@@ -114,10 +131,14 @@ class CategoryController extends Controller
      */
     public function getAll()
     {
-        $categories = Category::whereNull('parent_id')
-            ->with('subcategories')
-            ->get();
-
-        return response()->json($categories);
+        try {
+            $categories = Category::whereNull('parent_id')
+                ->with('subcategories')
+                ->get();
+    
+            return $this->sendSuccess('Categories fetched successfully', $categories);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
     }
 }
