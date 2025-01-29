@@ -11,31 +11,34 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ColorController;
 
 
-// Customer auth routes
-Route::prefix('customer')->group(function () {
-    Route::post('register', [CustomerAuthController::class, 'register']);
-    Route::post('login', [CustomerAuthController::class, 'login']);
+// Auth routes
+Route::prefix('auth')->group(function () {
+    // Customer auth routes
+    Route::prefix('customer')->group(function () {
+        Route::post('register', [CustomerAuthController::class, 'register']);
+        Route::post('login', [CustomerAuthController::class, 'login']);
 
-    Route::post('password/forgot', [CustomerAuthController::class, 'forgotPassword']);
-    Route::post('password/reset', [CustomerAuthController::class, 'resetPassword'])->name('password.reset');
-    Route::get('password/reset/{token}', [CustomerAuthController::class, 'showResetForm'])->name('password.reset');
+        Route::post('password/forgot', [CustomerAuthController::class, 'forgotPassword']);
+        Route::post('password/reset', [CustomerAuthController::class, 'resetPassword'])->name('password.reset');
+        Route::get('password/reset/{token}', [CustomerAuthController::class, 'showResetForm'])->name('password.reset');
 
-    Route::middleware(CustomerJWTMiddleware::class)->group(function () {
-        Route::get('me', [CustomerAuthController::class, 'me']);
-        Route::post('logout', [CustomerAuthController::class, 'logout']);
+        Route::middleware(CustomerJWTMiddleware::class)->group(function () {
+            Route::get('me', [CustomerAuthController::class, 'me']);
+            Route::post('logout', [CustomerAuthController::class, 'logout']);
+        });
     });
-});
 
-// Admin auth routes
-Route::prefix('admin')->group(function () {
-    Route::post('register', [AdminAuthController::class, 'register']);
-    Route::post('login', [AdminAuthController::class, 'login']);
-    
-    Route::post('forgot-password', [AdminAuthController::class, 'forgotPassword']);
-    Route::post('reset-password', [AdminAuthController::class, 'resetPassword']);
+    // Admin auth routes
+    Route::prefix('admin')->group(function () {
+        Route::post('register', [AdminAuthController::class, 'register']);
+        Route::post('login', [AdminAuthController::class, 'login']);
+        
+        Route::post('forgot-password', [AdminAuthController::class, 'forgotPassword']);
+        Route::post('reset-password', [AdminAuthController::class, 'resetPassword']);
 
-    Route::middleware(AdminJWTMiddleware::class)->group(function () {
-        Route::get('me', [AdminAuthController::class, 'me']);
+        Route::middleware(AdminJWTMiddleware::class)->group(function () {
+            Route::get('me', [AdminAuthController::class, 'me']);
+        });
     });
 });
 
