@@ -52,6 +52,7 @@ Route::prefix('categories')->group(function () {
     Route::put('{id}', [CategoryController::class, 'edit']);
     Route::get('{id}', [CategoryController::class, 'getById']);
     Route::get('{id}/subcategories', [CategoryController::class, 'getSubcategories']);
+    Route::get('{id}/products', [CategoryController::class, 'getAllProductsForCategory']);
 });
 
 // Slider routes
@@ -61,6 +62,7 @@ Route::prefix('sliders')->group(function () {
     Route::delete('{position}', [SliderController::class, 'deleteByPosition']);
 });
 
+// Color routes
 Route::prefix('color')->group(function () {
     Route::get('/', [ColorController::class, 'index']);
     Route::post('/', [ColorController::class, 'store']);
