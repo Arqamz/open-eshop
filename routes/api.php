@@ -42,6 +42,16 @@ Route::prefix('auth')->group(function () {
     });
 });
 
+use App\Http\Controllers\CustomerController;
+
+Route::prefix('customer')->group(function () {
+    Route::put('/customer/update-info', [CustomerController::class, 'updateCustomerInfo']);
+    Route::get('/cart', [CustomerController::class, 'getCart']);
+    Route::post('/cart/add-item', [CustomerController::class, 'addItemToCart']);
+    Route::put('/cart/update-item/{cartItemId}', [CustomerController::class, 'updateCartItem']);
+    Route::delete('/cart/remove-item/{cartItemId}', [CustomerController::class, 'removeItemFromCart']);
+});
+
 // Category routes
 Route::prefix('categories')->group(function () {
     Route::get('/', [CategoryController::class, 'getAll']);

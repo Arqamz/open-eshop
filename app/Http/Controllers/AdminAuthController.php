@@ -82,7 +82,6 @@ class AdminAuthController extends BaseController
     {
 
         try{
-
             $request->validate(['email' => 'required|email']);
 
             $status = Password::sendResetLink($request->only('email'));
