@@ -22,6 +22,18 @@ class Customer extends Authenticatable implements JWTSubject
         $this->notify(new ResetPassword($token));
     }
 
+    protected static function booted()
+    {
+        static::created(function ($customer) {
+            $customer->cart()->create();
+        });
+    }
+
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
