@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerAuthController;
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Middleware\AdminJWTMiddleware;
 use App\Http\Middleware\CustomerJWTMiddleware;
 use App\Http\Controllers\CategoryController;
@@ -41,8 +42,6 @@ Route::prefix('auth')->group(function () {
         });
     });
 });
-
-use App\Http\Controllers\CustomerController;
 
 Route::prefix('customer')->group(function () {
     Route::put('/customer/update-info', [CustomerController::class, 'updateCustomerInfo']);

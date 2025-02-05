@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
 use App\Models\Cart;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Exception;
 
 class CustomerController extends BaseController
@@ -13,7 +13,7 @@ class CustomerController extends BaseController
     public function updateCustomerInfo(Request $request)
     {
         try {
-            $customer = $request->user();
+            $customer = JWTAuth::parseToken()->authenticate();
             $customer->update($request->only(['first_name', 'last_name', 'email']));
             return $this->sendSuccess('Customer info updated successfully', $customer);
         } catch (Exception $e) {
@@ -24,7 +24,7 @@ class CustomerController extends BaseController
     public function getCart(Request $request)
     {
         try {
-            $customer = $request->user();
+            $customer = JWTAuth::parseToken()->authenticate();
             $cart = $customer->cart()->first();
 
             if ($cart) {
@@ -40,7 +40,7 @@ class CustomerController extends BaseController
     public function addItemToCart(Request $request)
     {
         try {
-            $customer = $request->user();
+            $customer = JWTAuth::parseToken()->authenticate();
             $cart = $customer->cart()->first();
 
             if (!$cart) {
