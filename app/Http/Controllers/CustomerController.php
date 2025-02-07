@@ -28,7 +28,7 @@ class CustomerController extends BaseController
             $cart = $customer->cart()->first();
 
             if ($cart) {
-                return $this->sendSuccess('Cart fetched successfully', $cart->orderItems);
+                return $this->sendSuccess('Cart fetched successfully', $cart->cartItems());
             } else {
                 return $this->sendError('No items in cart.');
             }
@@ -47,7 +47,7 @@ class CustomerController extends BaseController
                 $cart = Cart::create(['customer_id' => $customer->id]);
             }
 
-            $cart->orderItems()->create([
+            $cart->cartItems()->create([
                 'product_id' => $request->product_id,
                 'quantity' => $request->quantity
             ]);
