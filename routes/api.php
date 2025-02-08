@@ -10,7 +10,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ColorController;
-
+use App\Http\Controllers\OrderController;
 
 // Auth routes
 Route::prefix('auth')->group(function () {
@@ -49,6 +49,13 @@ Route::prefix('customer')->group(function () {
     Route::post('/cart/add-item', [CustomerController::class, 'addItemToCart']);
     Route::put('/cart/update-item/{cartItemId}', [CustomerController::class, 'updateCartItem']);
     Route::delete('/cart/remove-item/{cartItemId}', [CustomerController::class, 'removeItemFromCart']);
+
+    Route::post('/checkout', [OrderController::class, 'checkout']);
+    // Customer routes for orders
+    Route::prefix('orders')->group(function () {
+        Route::get('/', [OrderController::class, 'indexCustomer']);
+        Route::get('/{orderId}', [OrderController::class, 'getOrder']);
+    });
 });
 
 // Category routes
@@ -93,4 +100,10 @@ Route::prefix('products')->group(function () {
     Route::put('{id}/stock', [ProductController::class, 'updateStock']);
     Route::put('{id}/group', [ProductController::class, 'assignGroup']);
     Route::put('{id}/status', [ProductController::class, 'setStatus']);
+});
+
+// Admin routes for orders
+Route::prefix('admin/orders')->group(function () {
+    Route::get('/', [OrderController::class, 'indexAdmin']);
+    Route::put('/{orderId}/status', [OrderController::class, 'updateStatus']);
 });

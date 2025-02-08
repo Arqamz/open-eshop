@@ -81,23 +81,4 @@ class CustomerController extends BaseController
             return $this->handleException($e);
         }
     }
-
-    // public function deleteCartAfterOrder(Request $request)
-    // {
-    //     try {
-    //         $customer = $request->user();
-    //         $cart = $customer->cart()->first();
-
-    //         // if ($cart) {
-    //         //     // Here you can check if the cart is associated with an order.
-    //         //     // If the cart has an order_id, it means the cart has been processed
-    //         //     $cart->deleteCartAfterOrder();
-    //         //     return $this->sendSuccess('Cart deleted after order');
-    //         // }
-
-    //         return $this->sendError('No cart found');
-    //     } catch (Exception $e) {
-    //         return $this->handleException($e);
-    //     }
-    // }
 }
