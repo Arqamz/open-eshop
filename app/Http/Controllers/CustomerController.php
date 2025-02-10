@@ -7,6 +7,7 @@ use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class CustomerController extends BaseController
 {
@@ -27,8 +28,10 @@ class CustomerController extends BaseController
             $customer = JWTAuth::parseToken()->authenticate();
             $cart = $customer->cart()->first();
 
-            if ($cart) {
-                return $this->sendSuccess('Cart fetched successfully', $cart->cartItems());
+            $cartItems = $cart->cartItems()->get();
+
+            if ($cartItems->isNotEmpty()) {
+                return $this->sendSuccess('Cart fetched successfully', $cartItems);
             } else {
                 return $this->sendError('No items in cart.');
             }
