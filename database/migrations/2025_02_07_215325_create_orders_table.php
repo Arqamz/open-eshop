@@ -16,6 +16,11 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
             $table->decimal('total_price', 10, 2);
             $table->enum('status', ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'])->default('pending');
+            $table->string('shipping_address');
+            $table->string('shipping_city');
+            $table->string('shipping_state');
+            $table->string('shipping_zip');
+            $table->string('shipping_country');
             $table->timestamps();
         });
     }
