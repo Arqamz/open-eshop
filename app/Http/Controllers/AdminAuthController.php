@@ -133,4 +133,36 @@ class AdminAuthController extends BaseController
     {
         return $this->sendSuccess('Please provide your new password.', $token);
     }
+
+    /**
+     * View all admins
+     */
+    public function viewAllAdmins()
+    {
+        try {
+            $admins = Admin::all();
+            return $this->sendSuccess('All admins retrieved successfully', $admins, 200);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    /**
+     * Delete an admin account
+     */
+    public function deleteAdmin($id)
+    {
+        try {
+            $admin = Admin::find($id);
+
+            if (!$admin) {
+                return $this->sendError('Admin not found', null, 404);
+            }
+
+            $admin->delete();
+            return $this->sendSuccess('Admin deleted successfully', null, 200);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
+    }
 }

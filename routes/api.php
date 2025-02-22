@@ -43,6 +43,12 @@ Route::prefix('auth')->group(function () {
     });
 });
 
+// Admin management routes
+Route::prefix('admin')->middleware(AdminJWTMiddleware::class)->group(function () {
+    Route::get('view-all', [AdminAuthController::class, 'viewAllAdmins']);
+    Route::delete('delete/{id}', [AdminAuthController::class, 'deleteAdmin']);
+});
+
 Route::prefix('customer')->group(function () {
     Route::put('/customer/update-info', [CustomerController::class, 'updateCustomerInfo']);
     Route::get('/cart', [CustomerController::class, 'getCart']);
