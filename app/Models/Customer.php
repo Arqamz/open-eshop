@@ -13,7 +13,19 @@ class Customer extends Authenticatable implements JWTSubject
     use Notifiable;
     use CanResetPassword;
 
-    protected $fillable = ['first_name', 'last_name', 'email', 'password'];
+    protected $fillable = [
+        'first_name', 
+        'last_name', 
+        'email', 
+        'password', 
+        'phone_number', 
+        'address_line1', 
+        'address_line2', 
+        'city', 
+        'state', 
+        'zip_code', 
+        'country'
+    ];
 
     protected $hidden = ['password', 'remember_token'];
 
