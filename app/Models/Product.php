@@ -13,6 +13,11 @@ class Product extends Model
         'name',
         'description',
         'long_description',
+        'is_featured',
+        'discount',
+        'profit_margin',
+        'sale_price',
+        'cost_price',
         'image1',
         'image2',
         'image3',
@@ -24,7 +29,7 @@ class Product extends Model
         'weight',
         'category_id',
         'color_id',
-        'size',
+        'size_id',
         'slug',
         'seo_keywords',
         'product_group_id',
@@ -44,6 +49,14 @@ class Product extends Model
     public function color()
     {
         return $this->belongsTo(Color::class);
+    }
+
+    /**
+     * Get the size associated with the product.
+     */
+    public function size()
+    {
+        return $this->belongsTo(Size::class);
     }
 
     /**
