@@ -11,6 +11,7 @@ class Order extends Model
 
     protected $fillable = [
         'customer_id',
+        'phone_number',
         'shipping_address',
         'shipping_city',
         'shipping_state',
@@ -18,6 +19,8 @@ class Order extends Model
         'shipping_country',
         'total_price',
         'status',
+        'tracking_id',
+        'tracking_description'
     ];
 
     /**
