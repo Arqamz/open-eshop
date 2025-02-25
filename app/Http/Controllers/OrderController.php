@@ -81,6 +81,7 @@ class OrderController extends BaseController
         }
     }
 
+    
     /**
      * Checkout: Convert a cart into an order.
      */
@@ -105,71 +106,83 @@ class OrderController extends BaseController
                 return response()->json(['error' => 'No active cart found.'], 404);
             }
 
-            $totalPrice = $cart->cartItems()
+            // Calculate shipping cost
+            $totalQuantity = $cart->cartItems->sum('quantity');
+            $shippingCost = $this->calculateShippingCost($totalQuantity);
+
+            // Calculate total price including shipping
+            $subtotal = $cart->cartItems()
                 ->join('products', 'cart_items.product_id', '=', 'products.id')
                 ->selectRaw('SUM(products.price * cart_items.quantity) as total')
                 ->value('total');
-            Log::info('Calculated total price for cart', ['total_price' => $totalPrice]);
 
-            $finalAmount = $totalPrice;
+            $finalAmount = $subtotal + $shippingCost;
 
+            // Create order record
             $order = Order::create([
-                'customer_id'       => $customer->id,
-                'total_price'       => $finalAmount,
-                'status'            => 'pending',
-                'shipping_address'  => $validated['shipping_address'],
-                'shipping_city'     => $validated['shipping_city'],
-                'shipping_state'    => $validated['shipping_state'],
-                'shipping_zip'      => $validated['shipping_zip'],
-                'shipping_country'  => $validated['shipping_country'],
+                'customer_id' => $customer->id,
+                'total_price' => $finalAmount,
+                'status' => 'pending',
+                'shipping_address' => $validated['shipping_address'],
+                'shipping_city' => $validated['shipping_city'],
+                'shipping_state' => $validated['shipping_state'],
+                'shipping_zip' => $validated['shipping_zip'],
+                'shipping_country' => $validated['shipping_country'],
             ]);
-            Log::info('Order created', ['order_id' => $order->id]);
 
+            // Prepare line items for Stripe
+            $lineItems = [];
             foreach ($cart->cartItems as $cartItem) {
+                $product = $cartItem->product;
                 OrderItem::create([
-                    'order_id'           => $order->id,
-                    'product_id'         => $cartItem->product_id,
-                    'quantity'           => $cartItem->quantity,
-                    'price_at_checkout'  => $cartItem->product->price,
-                ]);
-                Log::info('Order item created', [
-                    'order_id'   => $order->id,
+                    'order_id' => $order->id,
                     'product_id' => $cartItem->product_id,
-                    'quantity'   => $cartItem->quantity,
+                    'quantity' => $cartItem->quantity,
+                    'price_at_checkout' => $product->price,
                 ]);
+
+                // Add product as line item
+                $lineItems[] = [
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'unit_amount' => (int)($product->price * 100), // Convert to cents
+                        'product_data' => [
+                            'name' => $product->name,
+                            'description' => substr($product->description, 0, 100),
+                            'images' => [$request->getSchemeAndHttpHost() . '/storage/' . $product->image1],
+                        ],
+                    ],
+                    'quantity' => $cartItem->quantity,
+                ];
             }
 
-            // Note: DO NOT clear cart items here. They will be cleared when the payment is confirmed via Stripe webhook.
+            // Add shipping as separate line item
+            if ($shippingCost > 0) {
+                $lineItems[] = [
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'unit_amount' => (int)($shippingCost * 100),
+                        'product_data' => [
+                            'name' => 'Shipping Cost',
+                            'description' => 'Shipping and handling fee',
+                        ],
+                    ],
+                    'quantity' => 1,
+                ];
+            }
 
-            // Create a Stripe Checkout Session
-            // Create a Stripe Price object using the final amount and product data
+            // Create Stripe session with line items
             Stripe::setApiKey(env('STRIPE_SECRET'));
-            $priceObject = \Stripe\Price::create([
-                'currency' => 'usd', // Adjust as necessary
-                'unit_amount' => $finalAmount * 100, // Stripe requires amount in cents
-                'product_data' => [
-                    'name' => 'Order #' . $order->id,
-                    // Additional product details can be included if needed
-                ],
-            ]);
-            Log::info('Stripe Price object created', ['price_id' => $priceObject->id]);
-
-            // Create a Stripe Checkout Session using the Price object
             $session = StripeSession::create([
                 'payment_method_types' => ['card'],
-                'line_items' => [[
-                    'price'    => $priceObject->id,
-                    'quantity' => 1,
-                ]],
+                'line_items' => $lineItems,
                 'mode' => 'payment',
                 'metadata' => [
                     'order_id' => $order->id,
                 ],
-                // Hardcoded success and cancel URLs for demonstration
-                'success_url' => 'https://example.com/checkout/success',
-                'cancel_url'  => 'https://example.com/checkout/cancel',
+                'success_url' => 'https://79r.6cf.mytemp.website/payment/success',
+                'cancel_url' => 'https://79r.6cf.mytemp.website/payment/failed',
             ]);
-            Log::info('Stripe Checkout Session created', ['session_id' => $session->id]);
 
             DB::commit();
 
@@ -182,6 +195,20 @@ class OrderController extends BaseController
             Log::error('Checkout failed', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Checkout failed: ' . $e->getMessage()], 500);
         }
+    }
+
+    private function calculateShippingCost($totalQuantity): float
+    {
+        if ($totalQuantity <= 0) return 0;
+        if ($totalQuantity === 1) return 10.50;
+        if ($totalQuantity === 2) return 14.70;
+        
+        // For quantities > 2, add 25% for each additional item
+        $cost = 14.70; // Base cost for 2 items
+        for ($i = 3; $i <= $totalQuantity; $i++) {
+            $cost += $cost * 0.25;
+        }
+        return round($cost, 2);
     }
 
     // public function handleWebhook(Request $request)
