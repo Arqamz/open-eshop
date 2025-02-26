@@ -71,9 +71,15 @@ class OrderController extends BaseController
         try {
             $validated = $request->validate([
                 'status' => 'required|in:pending,confirmed,shipped,delivered,cancelled',
+                'tracking_id' => 'nullable|string',
+                'tracking_description' => 'nullable|string',
             ]);
             $order = Order::findOrFail($orderId);
-            $order->update(['status' => $validated['status']]);
+            $order->update([
+                'status' => $validated['status'],
+                'tracking_id' => $validated['tracking_id'] ?? $order->tracking_id,
+                'tracking_description' => $validated['tracking_description'] ?? $order->tracking_description,
+            ]);
 
             return $this->sendSuccess('Status updated successfully', $order, 204);
         } catch (Exception $e) {
@@ -81,7 +87,6 @@ class OrderController extends BaseController
         }
     }
 
-    
     /**
      * Checkout: Convert a cart into an order.
      */
