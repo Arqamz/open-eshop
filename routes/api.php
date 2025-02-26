@@ -46,6 +46,7 @@ Route::prefix('auth')->group(function () {
 // Admin management routes
 Route::prefix('admin')->middleware(AdminJWTMiddleware::class)->group(function () {
     Route::get('view-all', [AdminAuthController::class, 'viewAllAdmins']);
+    Route::get('view-customers', [AdminAuthController::class, 'viewAllCustomers']);
     Route::delete('delete/{id}', [AdminAuthController::class, 'deleteAdmin']);
 });
 
@@ -103,6 +104,7 @@ Route::prefix('products')->group(function () {
     Route::put('{id}', [ProductController::class, 'update']);
     Route::delete('{id}', [ProductController::class, 'destroy']);
     Route::put('{id}/price', [ProductController::class, 'updatePrice']);
+    Route::put('{id}/featured', [ProductController::class, 'setFeatured']);
     Route::put('{id}/stock', [ProductController::class, 'updateStock']);
     Route::put('{id}/group', [ProductController::class, 'assignGroup']);
     Route::put('{id}/status', [ProductController::class, 'setStatus']);

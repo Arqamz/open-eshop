@@ -80,6 +80,11 @@ class ProductController extends BaseController
                 'name' => 'required|string',
                 'description' => 'required|string',
                 'long_description' => 'nullable|string',
+                'is_featured' => 'boolean',
+                'discount' => 'nullable|numeric|min:0|max:100',
+                'profit_margin' => 'nullable|numeric|min:0|max:100',
+                'sale_price' => 'required|numeric',
+                'cost_price' => 'nullable|numeric',
                 'image1' => 'required|file|mimes:jpeg,png,jpg',
                 'image2' => 'nullable|file|mimes:jpeg,png,jpg',
                 'image3' => 'nullable|file|mimes:jpeg,png,jpg',
@@ -91,7 +96,7 @@ class ProductController extends BaseController
                 'weight' => 'required|numeric',
                 'category_id' => 'required|exists:categories,id',
                 'color_id' => 'required|exists:colors,id',
-                'size' => 'nullable|string',
+                'size_id' => 'required|exists:sizes,id',
                 'seo_keywords' => 'nullable|string',
                 'product_group_id' => 'nullable|integer',
             ]);
@@ -135,21 +140,26 @@ class ProductController extends BaseController
             $product = Product::findOrFail($id);
     
             $validated = $request->validate([
-                'name' => 'required|string',
-                'description' => 'required|string',
+                'name' => 'nullable|string',
+                'description' => 'nullable|string',
                 'long_description' => 'nullable|string',
-                'image1' => 'required|file|mimes:jpeg,png,jpg',
+                'is_featured' => 'nullable|boolean',
+                'discount' => 'nullable|numeric|min:0|max:100',
+                'profit_margin' => 'nullable|numeric|min:0|max:100',
+                'sale_price' => 'nullable|numeric',
+                'cost_price' => 'nullable|numeric',
+                'price' => 'nullable|numeric',
+                'image1' => 'nullable|file|mimes:jpeg,png,jpg',
                 'image2' => 'nullable|file|mimes:jpeg,png,jpg',
                 'image3' => 'nullable|file|mimes:jpeg,png,jpg',
                 'image4' => 'nullable|file|mimes:jpeg,png,jpg',
                 'image5' => 'nullable|file|mimes:jpeg,png,jpg',
-                'status' => 'required|boolean',
-                'stock' => 'required|integer',
-                'price' => 'required|numeric',
-                'weight' => 'required|numeric',
-                'category_id' => 'required|exists:categories,id',
-                'color_id' => 'required|exists:colors,id',
-                'size' => 'nullable|string',
+                'status' => 'nullable|boolean',
+                'stock' => 'nullable|integer',
+                'weight' => 'nullable|numeric',
+                'category_id' => 'nullable|exists:categories,id',
+                'color_id' => 'nullable|exists:colors,id',
+                'size_id' => 'nullable|exists:sizes,id',
                 'seo_keywords' => 'nullable|string',
                 'product_group_id' => 'nullable|integer',
             ]);
@@ -168,6 +178,9 @@ class ProductController extends BaseController
                         'public'
                     );
                     $validated[$imageField] = $filePath;
+                } else {
+                    // Ensure the existing image path is retained if no new image is uploaded
+                    $validated[$imageField] = $product->$imageField;
                 }
             }
     
@@ -206,12 +219,42 @@ class ProductController extends BaseController
      */
     public function updatePrice(Request $request, $id)
     {
-
         try {
-            $validated = $request->validate(['price' => 'required|numeric']);
+            $validated = $request->validate([
+                'cost_price' => 'required|numeric|min:0',
+                'profit_margin' => 'required|numeric|min:0|max:100',
+                'discount' => 'nullable|numeric|min:0|max:100',
+                'sale_price' => 'required|numeric|min:0',
+                'final_price' => 'required|numeric|min:0',
+            ]);
+
             $product = Product::findOrFail($id);
-            $product->update(['price' => $validated['price']]);
+
+            $product->update([
+                'cost_price' => $validated['cost_price'],
+                'profit_margin' => $validated['profit_margin'],
+                'discount' => $validated['discount'] ?? 0,
+                'sale_price' => $validated['sale_price'],
+                'price' => $validated['final_price'],
+            ]);
+
             return $this->sendSuccess('Product price updated successfully.', $product);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    /**
+     * Set the is_featured property of a product.
+     */
+    public function setFeatured(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate(['is_featured' => 'required|boolean']);
+            $product = Product::findOrFail($id);
+            $product->is_featured = $validated['is_featured'];
+            $product->save();
+            return $this->sendSuccess('Product featured status updated successfully.', $product);
         } catch (Exception $e) {
             return $this->handleException($e);
         }

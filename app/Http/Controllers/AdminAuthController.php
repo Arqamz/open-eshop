@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admin;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Hash;
@@ -142,6 +143,19 @@ class AdminAuthController extends BaseController
         try {
             $admins = Admin::all();
             return $this->sendSuccess('All admins retrieved successfully', $admins, 200);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    /**
+     * View all customers sorted by date
+     */
+    public function viewAllCustomers()
+    {
+        try {
+            $customers = Customer::orderBy('created_at', 'desc')->get();
+            return $this->sendSuccess('All customers retrieved successfully', $customers, 200);
         } catch (Exception $e) {
             return $this->handleException($e);
         }
