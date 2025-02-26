@@ -20,6 +20,13 @@ class CustomerAuthController extends BaseController
                 'last_name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:customers',
                 'password' => 'required|string|min:8',
+                'phone_number' => 'required|string|max:20',
+                'address_line1' => 'required|string|max:255',
+                'address_line2' => 'nullable|string|max:255',
+                'city' => 'required|string|max:255',
+                'state' => 'required|string|max:255',
+                'zip_code' => 'required|string|max:20',
+                'country' => 'required|string|max:255',
             ]);
     
             $user = Customer::create([
@@ -27,6 +34,13 @@ class CustomerAuthController extends BaseController
                 'last_name' => $request->last_name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
+                'phone_number' => $request->phone_number,
+                'address_line1' => $request->address_line1,
+                'address_line2' => $request->address_line2,
+                'city' => $request->city,
+                'state' => $request->state,
+                'zip_code' => $request->zip_code,
+                'country' => $request->country,
             ]);
     
             return $this->sendSuccess("Customer created successfully", $user, 201);
