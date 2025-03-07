@@ -10,6 +10,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ColorController;
+use App\Http\Controllers\SizeController;
 use App\Http\Controllers\OrderController;
 
 // Auth routes
@@ -92,6 +93,15 @@ Route::prefix('color')->group(function () {
     Route::get('{id}', [ColorController::class, 'show']);
     Route::put('{id}', [ColorController::class, 'update']);
     Route::delete('{id}', [ColorController::class, 'destroy']);
+});
+
+// Color routes
+Route::prefix('size')->group(function () {
+    Route::get('/', [SizeController::class, 'index']);
+    Route::post('/', [SizeController::class, 'store']);
+    Route::get('{id}', [SizeController::class, 'show']);
+    Route::put('{id}', [SizeController::class, 'update']);
+    Route::delete('{id}', [SizeController::class, 'destroy']);
 });
 
 // Product routes

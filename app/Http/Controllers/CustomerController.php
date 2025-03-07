@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class CustomerController extends BaseController
 {
+    /*UPDATE ADDRESS*/ 
     public function updateCustomerInfo(Request $request)
     {
         try {
