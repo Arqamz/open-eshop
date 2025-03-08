@@ -99,6 +99,7 @@ class OrderController extends BaseController
             Log::info('Authenticated customer', ['customer_id' => $customer->id]);
 
             $validated = $request->validate([
+                'phone_number'     => 'required|string',
                 'shipping_address' => 'required|string',
                 'shipping_city'    => 'required|string',
                 'shipping_state'   => 'required|string',
@@ -129,6 +130,7 @@ class OrderController extends BaseController
                 'customer_id' => $customer->id,
                 'total_price' => $finalAmount,
                 'status' => 'pending',
+                'phone_number' => $validated['phone_number'],
                 'shipping_address' => $validated['shipping_address'],
                 'shipping_city' => $validated['shipping_city'],
                 'shipping_state' => $validated['shipping_state'],
@@ -162,7 +164,10 @@ class OrderController extends BaseController
                 ];
             }
 
-            // Add shipping as separate line item
+            // Log line items for debugging
+            Log::info('Line items prepared for Stripe', ['line_items' => $lineItems]);
+
+            // Add shipping as separate line item if applicable
             if ($shippingCost > 0) {
                 $lineItems[] = [
                     'price_data' => [
@@ -175,6 +180,12 @@ class OrderController extends BaseController
                     ],
                     'quantity' => 1,
                 ];
+            }
+
+            // Check if line items are empty
+            if (empty($lineItems)) {
+                Log::error('No line items found for checkout session');
+                return response()->json(['error' => 'No items to purchase.'], 400);
             }
 
             // Create Stripe session with line items
