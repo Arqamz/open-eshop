@@ -85,7 +85,7 @@ class AdminAuthController extends BaseController
         try{
             $request->validate(['email' => 'required|email']);
 
-            $status = Password::sendResetLink($request->only('email'));
+            $status = Password::broker('admins')->sendResetLink($request->only('email'));
 
             if ($status === Password::RESET_LINK_SENT) {
                 return $this->sendSuccess('Password reset link sent successfully', null, 200);
@@ -110,7 +110,7 @@ class AdminAuthController extends BaseController
                 'password' => 'required|string|min:8|confirmed',
             ]);
     
-            $status = Password::reset(
+            $status = Password::broker('admins')->reset(
                 $request->only('email', 'password', 'password_confirmation', 'token'),
                 function ($admin) use ($request) {
                     $admin->password = Hash::make($request->password);
