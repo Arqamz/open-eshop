@@ -11,12 +11,36 @@ use Illuminate\Support\Facades\Log;
 
 class CustomerController extends BaseController
 {
-    /*UPDATE ADDRESS*/ 
+    
     public function updateCustomerInfo(Request $request)
     {
         try {
+
+            $request->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'phone_number' => 'nullable|string|max:20',
+                'address_line1' => 'nullable|string|max:255',
+                'address_line2' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
+                'state' => 'nullable|string|max:255',
+                'zip_code' => 'nullable|string|max:20',
+                'country' => 'nullable|string|max:255',
+            ]);
+
             $customer = JWTAuth::parseToken()->authenticate();
-            $customer->update($request->only(['first_name', 'last_name', 'email']));
+            $customer->update($request->only([
+                'first_name', 
+                'last_name', 
+                'phone_number', 
+                'address_line1', 
+                'address_line2', 
+                'city', 
+                'state', 
+                'zip_code', 
+                'country'
+            ]));
+
             return $this->sendSuccess('Customer info updated successfully', $customer);
         } catch (Exception $e) {
             return $this->handleException($e);
@@ -66,6 +90,10 @@ class CustomerController extends BaseController
     {
         try {
             $cartItem = CartItem::findOrFail($cartItemId);
+            $request->validate([
+                'quantity' => 'required|integer|min:1'
+            ]);
+
             $cartItem->update(['quantity' => $request->quantity]);
 
             return $this->sendSuccess('Cart item updated');
