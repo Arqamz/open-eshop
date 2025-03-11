@@ -14,6 +14,7 @@ class Product extends Model
         'description',
         'long_description',
         'is_featured',
+        'is_new',
         'discount',
         'profit_margin',
         'sale_price',
