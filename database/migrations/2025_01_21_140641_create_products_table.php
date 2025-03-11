@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->text('long_description')->nullable();
+            $table->boolean('is_new')->default(false);
             $table->boolean('is_featured')->default(false);
             $table->decimal('discount', 5, 2)->default(0);
             $table->decimal('profit_margin', 5, 2)->default(0);

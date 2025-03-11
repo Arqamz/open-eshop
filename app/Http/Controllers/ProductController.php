@@ -6,8 +6,6 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 use Exception;
 
 class ProductController extends BaseController
@@ -80,6 +78,7 @@ class ProductController extends BaseController
                 'name' => 'required|string',
                 'description' => 'required|string',
                 'long_description' => 'nullable|string',
+                'is_new' => 'boolean',
                 'is_featured' => 'boolean',
                 'discount' => 'nullable|numeric|min:0|max:100',
                 'profit_margin' => 'nullable|numeric|min:0|max:100',
@@ -143,6 +142,7 @@ class ProductController extends BaseController
                 'name' => 'nullable|string',
                 'description' => 'nullable|string',
                 'long_description' => 'nullable|string',
+                'is_new' => 'nullable|boolean',
                 'is_featured' => 'nullable|boolean',
                 'discount' => 'nullable|numeric|min:0|max:100',
                 'profit_margin' => 'nullable|numeric|min:0|max:100',
@@ -255,6 +255,22 @@ class ProductController extends BaseController
             $product->is_featured = $validated['is_featured'];
             $product->save();
             return $this->sendSuccess('Product featured status updated successfully.', $product);
+        } catch (Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    /**
+     * Set the is_new property of a product.
+     */
+    public function setNew(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate(['is_new' => 'required|boolean']);
+            $product = Product::findOrFail($id);
+            $product->is_new = $validated['is_new'];
+            $product->save();
+            return $this->sendSuccess('Product new status updated successfully.', $product);
         } catch (Exception $e) {
             return $this->handleException($e);
         }
