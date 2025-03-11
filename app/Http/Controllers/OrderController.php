@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -185,8 +186,8 @@ class OrderController extends BaseController
                 'metadata' => [
                     'order_id' => $order->id,
                 ],
-                'success_url' => 'https://79r.6cf.mytemp.website/payment/success',
-                'cancel_url' => 'https://79r.6cf.mytemp.website/payment/failed',
+                'success_url' => env('FRONTEND_URL') . '/payment/success',
+                'cancel_url' => env('FRONTEND_URL') . '/payment/failed',
             ]);
 
             DB::commit();
@@ -204,14 +205,17 @@ class OrderController extends BaseController
 
     private function calculateShippingCost($totalQuantity): float
     {
+        // Fetch base cost and additional ratio from the config model
+        $baseCost = Config::where('config_key', 'shipping_base_cost')->value('config_value');
+        $additionalRatio = Config::where('config_key', 'shipping_additional_ratio')->value('config_value');
+
         if ($totalQuantity <= 0) return 0;
-        if ($totalQuantity === 1) return 10.50;
-        if ($totalQuantity === 2) return 14.70;
-        
-        // For quantities > 2, add 25% for each additional item
-        $cost = 14.70; // Base cost for 2 items
-        for ($i = 3; $i <= $totalQuantity; $i++) {
-            $cost += $cost * 0.25;
+        if ($totalQuantity === 1) return (float)$baseCost;
+
+        // For quantities > 1, add the additional ratio for each additional item
+        $cost = (float)$baseCost; // Base cost for 1 item
+        for ($i = 2; $i <= $totalQuantity; $i++) {
+            $cost += $cost * ((float)$additionalRatio / 100);
         }
         return round($cost, 2);
     }
